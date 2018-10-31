@@ -15,7 +15,7 @@ class Face():
 
         Face.contador += 1
 
-
+        self.face_location = face_location
         top, right, bottom, left = face_location
         face_image = frame[top:bottom, left:right]
         pil_image = Image.fromarray(face_image)
@@ -84,6 +84,21 @@ class Faces():
         return nom
 
 
+    def displayNames(self,frame):
+        for face in self.arr_faces:
+            top, right, bottom, left = face.face_location
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+
+            # Draw a box around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+            # Draw a label with a name below the face
+            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, face.name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
 
 
@@ -248,7 +263,7 @@ while True:
 
     # Display the results
 #    for (top, right, bottom, left), name in zip(face_locations, face_names):
-
+    """
     #print(f_locations)
     for (top, right, bottom, left), name in zip(f_locations, faces.getFacesNames()):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
@@ -267,6 +282,11 @@ while True:
 
     # Display the resulting image
     cv2.imshow('Video', frame)
+    """
+
+    faces.displayNames(frame)
+    cv2.imshow('Video', frame)
+
 
     # Hit 'q' on the keyboard to quit!
     if cv2.waitKey(1) & 0xFF == ord('q'):
