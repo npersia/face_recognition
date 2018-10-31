@@ -199,7 +199,7 @@ while True:
         faces.saveFaces()
 
 
-        """
+
         face_names = []
         for face_encoding in faces.arr_encode_faces:
 
@@ -212,7 +212,7 @@ while True:
             face_names.append(name)
 
         #f_locations = faces.arr_face_locations
-        """
+
 
 
 
@@ -248,7 +248,7 @@ while True:
 
     # Display the results
 #    for (top, right, bottom, left), name in zip(face_locations, face_names):
-    """
+
     #print(f_locations)
     for (top, right, bottom, left), name in zip(f_locations, faces.getFacesNames()):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
@@ -264,7 +264,7 @@ while True:
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-        """
+
     # Display the resulting image
     cv2.imshow('Video', frame)
 
