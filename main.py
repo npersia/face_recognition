@@ -9,7 +9,7 @@ class Face():
     contador = 0
 
 
-    def __init__(self, frame, face_location):
+    def __init__(self, frame, face_location,face_encoding):
         self.name = "Unknown-" + str(Face.contador)
         self.file = "faces/Unknown-" + str(Face.contador) + ".jpg"
 
@@ -21,7 +21,8 @@ class Face():
         pil_image = Image.fromarray(face_image)
         pil_image.save(self.file, "JPEG")
 
-        self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
+        #self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
+        self.encoded = face_encoding
 
 
 
@@ -46,17 +47,47 @@ class Faces():
         else:
             return False
 
+
+    def encodeFaces(self):
+        self.arr_encode_faces = face_recognition.face_encodings(frame, self.arr_face_locations)
+
+    def locateFaces(self, frame):
+        self.arr_face_locations = face_recognition.face_locations(frame)
+
+
     def saveFaces(self,frame):
-        face_locations = face_recognition.face_locations(frame)
-        face_encodings = face_recognition.face_encodings(frame, face_locations)
-        for face_location in face_locations:
-            self.addFace(Face(frame, face_location))
+
+
+        for face_encoding in self.arr_encode_faces:
+
+
+            matches = face_recognition.compare_faces(self.getFacesEncoding(), face_encoding)
+
+            # If a match was found in known_face_encodings, just use the first one.
+            if True not in matches:
+                for face_location in self.arr_face_locations:
+                    self.addFace(Face(frame, face_location,face_encoding))
 
 
     def getFacesEncoding(self):
+        """estos son los faces conocidos
+        TODO cambiar nombre"""
         enc = []
         for f in self.arr_faces:
             enc.append(f.encoded)
+        return enc
+
+
+
+    def getFacesNames(self):
+        """estos son los faces conocidos por nombre
+        TODO cambiar nombre"""
+        nom = []
+        for f in self.arr_faces:
+            nom.append(f.name)
+        return nom
+
+
 
 
 
@@ -143,7 +174,7 @@ user_code = 0
 
 faces = Faces()
 
-
+f_locations = []
 
 
 while True:
@@ -161,17 +192,35 @@ while True:
         while_counter = 0
 
 
+        #face_locations = face_recognition.face_locations(rgb_small_frame)
+
+        #face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+
+
+
+        faces.locateFaces(rgb_small_frame)
+        faces.encodeFaces()
+        faces.saveFaces(rgb_small_frame)
+
+        face_names = []
+        for face_encoding in faces.arr_encode_faces:
+
+            matches = face_recognition.compare_faces(faces.getFacesEncoding(), face_encoding)
+            name = "Unknown"
+            if True in matches:
+                first_match_index = matches.index(True)
+                name = faces.getFacesNames()[first_match_index]
+
+            face_names.append(name)
+
+        f_locations = faces.arr_face_locations
 
 
 
 
-        face_locations = face_recognition.face_locations(rgb_small_frame)
 
 
-
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
-
+    """
         face_names = []
         for face_encoding in face_encodings:
 
@@ -194,13 +243,15 @@ while True:
                 known_face_encodings, known_face_names = load_faces()
 
             face_names.append(name)
-
+            """
 
     process_this_frame = not process_this_frame
 
 
     # Display the results
-    for (top, right, bottom, left), name in zip(face_locations, face_names):
+#    for (top, right, bottom, left), name in zip(face_locations, face_names):
+    print(faces.getFacesNames())
+    for (top, right, bottom, left), name in zip(f_locations, faces.getFacesNames()):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= 4
         right *= 4
