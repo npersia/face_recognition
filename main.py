@@ -12,8 +12,6 @@ class Face():
     def __init__(self, frame, face_location):
         self.name = "Unknown-" + str(Face.contador)
         self.file = "faces/Unknown-" + str(Face.contador) + ".jpg"
-        self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
-
 
         Face.contador += 1
 
@@ -23,12 +21,13 @@ class Face():
         pil_image = Image.fromarray(face_image)
         pil_image.save(self.file, "JPEG")
 
+        self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
 
 
 
 
 
-class faces():
+class Faces():
     def __init__(self):
         self.arr_faces = []
 
@@ -47,12 +46,24 @@ class faces():
         else:
             return False
 
-    def save_faces(self,frame):
+    def saveFaces(self,frame):
         face_locations = face_recognition.face_locations(frame)
+        face_encodings = face_recognition.face_encodings(frame, face_locations)
         for face_location in face_locations:
-            self.addFace(Face(frame,face_location))
+            self.addFace(Face(frame, face_location))
 
 
+    def getFacesEncoding(self):
+        enc = []
+        for f in self.arr_faces:
+            enc.append(f.encoded)
+
+
+
+
+
+    def compareFaces(self,face_encoding):
+        return face_recognition.compare_faces(self.getFacesEncoding(), face_encoding)
 
 
 
@@ -97,8 +108,12 @@ def load_faces():
 
 
             b = face_recognition.load_image_file("faces/" + image)
-            a = face_recognition.face_encodings(b)[0]
-            known_face_encodings.append(a)
+            try:
+                a = face_recognition.face_encodings(b)[0]
+
+                known_face_encodings.append(a)
+            except:
+                pass
             known_face_names.append(image)
     return known_face_encodings,known_face_names
 
@@ -123,11 +138,10 @@ while_counter = 0
 
 #esto es lo que va a setear el codigo de las personas que va leyendo
 user_code = 0
-#load_faces()
 
 
 
-
+faces = Faces()
 
 
 
@@ -145,14 +159,14 @@ while True:
     # Only process every other frame of video to save time
     if (process_this_frame) and (while_counter > 15):
         while_counter = 0
-        # Find all the faces and face encodings in the current frame of video
+
+
+
 
 
 
         face_locations = face_recognition.face_locations(rgb_small_frame)
 
-        #    ver donde poner esto!!!
-        #save_faces(rgb_small_frame,"image.jpg")
 
 
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
@@ -160,17 +174,17 @@ while True:
 
         face_names = []
         for face_encoding in face_encodings:
-            # See if the face is a match for the known face(s)
-
-            #print(len(known_face_encodings))
-
 
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            print(matches)
+
+
             name = "Unknown"
 
             # If a match was found in known_face_encodings, just use the first one.
             if True in matches:
                 first_match_index = matches.index(True)
+                print(first_match_index)
                 name = known_face_names[first_match_index]
 
 
