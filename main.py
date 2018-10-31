@@ -35,6 +35,9 @@ def save_faces(image,file_name):
 
 
 
+
+
+
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
