@@ -65,6 +65,19 @@ class Faces():
                     self.addFace(Face(self.frame, face_location,face_encoding))
 
 
+            else:
+                first_match_index = matches.index(True)
+
+                loc_match_index = self.arr_encode_faces.index(face_encoding)
+
+
+                a = self.arr_face_locations[loc_match_index]
+
+                self.arr_faces[first_match_index].face_location = a
+
+
+
+
     def getFacesEncoding(self):
         """estos son los faces conocidos
         TODO cambiar nombre"""
