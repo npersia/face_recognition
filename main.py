@@ -4,15 +4,56 @@ from PIL import Image
 import os
 
 
+class Face():
 
-# This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
-# other example, but it includes some basic performance tweaks to make things run a lot faster:
-#   1. Process each video frame at 1/4 resolution (though still display it at full resolution)
-#   2. Only detect faces in every other frame of video.
+    contador = 0
 
-# PLEASE NOTE: This example requires OpenCV (the `cv2` library) to be installed only to read from your webcam.
-# OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
-# specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
+
+    def __init__(self, frame, face_location):
+        self.name = "Unknown-" + str(Face.contador)
+        self.file = "faces/Unknown-" + str(Face.contador) + ".jpg"
+        self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
+
+
+        Face.contador += 1
+
+
+        top, right, bottom, left = face_location
+        face_image = frame[top:bottom, left:right]
+        pil_image = Image.fromarray(face_image)
+        pil_image.save(self.file, "JPEG")
+
+
+
+
+
+
+class faces():
+    def __init__(self):
+        self.arr_faces = []
+
+    def addFace(self, face):
+        self.arr_faces.append(face)
+
+    def getFaceName(self, name):
+        for f in self.arr_faces:
+            if f.name == name:
+                return f
+        return None
+
+    def existFaceName(self,name):
+        if self.getFaceName(name) != None:
+            return True
+        else:
+            return False
+
+    def save_faces(self,frame):
+        face_locations = face_recognition.face_locations(frame)
+        for face_location in face_locations:
+            self.addFace(Face(frame,face_location))
+
+
+
 
 
 
@@ -28,6 +69,8 @@ def save_faces(image,file_name):
         face_image = image[top:bottom, left:right]
         pil_image = Image.fromarray(face_image)
         pil_image.save(file_name + ".jpg", "JPEG")
+
+
 
 
 
@@ -134,9 +177,9 @@ while True:
             if name == "Unknown":
                 save_faces(rgb_small_frame, "faces/Unknown-" + str(user_code))
                 user_code += 1
+                known_face_encodings, known_face_names = load_faces()
 
             face_names.append(name)
-    known_face_encodings, known_face_names = load_faces()
 
 
     process_this_frame = not process_this_frame
