@@ -77,7 +77,7 @@ while_counter = 0
 
 #esto es lo que va a setear el codigo de las personas que va leyendo
 user_code = 0
-load_faces()
+#load_faces()
 
 
 
@@ -131,9 +131,10 @@ while True:
             if name == "Unknown":
                 save_faces(rgb_small_frame, "faces/Unknown-" + str(user_code))
                 user_code += 1
-                known_face_encodings, known_face_names = load_faces()
 
             face_names.append(name)
+    known_face_encodings, known_face_names = load_faces()
+
 
     process_this_frame = not process_this_frame
 
