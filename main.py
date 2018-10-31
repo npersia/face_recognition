@@ -47,26 +47,22 @@ class Faces():
         else:
             return False
 
-
-    def encodeFaces(self):
-        self.arr_encode_faces = face_recognition.face_encodings(frame, self.arr_face_locations)
-
     def locateFaces(self, frame):
+        self.frame = frame
         self.arr_face_locations = face_recognition.face_locations(frame)
 
 
-    def saveFaces(self,frame):
+    def encodeFaces(self):
+        self.arr_encode_faces = face_recognition.face_encodings(self.frame, self.arr_face_locations)
 
+
+    def saveFaces(self):
 
         for face_encoding in self.arr_encode_faces:
-
-
             matches = face_recognition.compare_faces(self.getFacesEncoding(), face_encoding)
-
-            # If a match was found in known_face_encodings, just use the first one.
             if True not in matches:
                 for face_location in self.arr_face_locations:
-                    self.addFace(Face(frame, face_location,face_encoding))
+                    self.addFace(Face(self.frame, face_location,face_encoding))
 
 
     def getFacesEncoding(self):
@@ -200,8 +196,10 @@ while True:
 
         faces.locateFaces(rgb_small_frame)
         faces.encodeFaces()
-        faces.saveFaces(rgb_small_frame)
+        faces.saveFaces()
 
+
+        """
         face_names = []
         for face_encoding in faces.arr_encode_faces:
 
@@ -213,8 +211,8 @@ while True:
 
             face_names.append(name)
 
-        f_locations = faces.arr_face_locations
-
+        #f_locations = faces.arr_face_locations
+        """
 
 
 
@@ -250,7 +248,8 @@ while True:
 
     # Display the results
 #    for (top, right, bottom, left), name in zip(face_locations, face_names):
-    print(faces.getFacesNames())
+    """
+    #print(f_locations)
     for (top, right, bottom, left), name in zip(f_locations, faces.getFacesNames()):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= 4
@@ -265,7 +264,7 @@ while True:
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
+        """
     # Display the resulting image
     cv2.imshow('Video', frame)
 
