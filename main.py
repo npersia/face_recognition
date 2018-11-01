@@ -34,6 +34,11 @@ class Faces:
         self.arr_face_locations = []
         self.arr_encode_faces = []
 
+    def change_face_name(self, old, new):
+        for f in self.arr_faces:
+            if f.name == old:
+                f.name = new
+
     def add_face(self, face):
         self.arr_faces.append(face)
 
@@ -108,8 +113,8 @@ class Faces:
             self.add_face(a_face)
 
 
-def process_video():
-    faces = Faces()
+def process_video(faces):
+
     faces.load_faces("faces")
 
     # Get a reference to webcam #0 (the default one)
@@ -149,9 +154,17 @@ def process_video():
     cv2.destroyAllWindows()
 
 
+faces = Faces()
+
+t = threading.Thread(target=process_video,args=(faces,))
+t.start()
+
+while True:
+    viejo = input('Nombre viejo: ')
+    #print(viejo)
+
+    nuevo = input('Nombre nuevo: ')
+    #print(nuevo)
 
 
-
-
-
-process_video()
+    faces.change_face_name(viejo, nuevo)
