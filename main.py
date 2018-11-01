@@ -23,6 +23,7 @@ class Face():
 
         #self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
         self.encoded = face_encoding
+        self.on_screen = False
 
 
 
@@ -58,8 +59,20 @@ class Faces():
 
     def saveFaces(self):
 
+        for f in self.arr_faces:
+            f.on_screen = False
+
+        i = 0
         for face_encoding in self.arr_encode_faces:
             matches = face_recognition.compare_faces(self.getFacesEncoding(), face_encoding)
+
+            #indices = [i for i, x in enumerate(my_list) if x == "whatever"]
+
+            indices = [i for i, x in enumerate(matches) if x == True]
+
+            for x in indices:
+                self.arr_faces[x].on_screen = True
+
             if True not in matches:
                 for face_location in self.arr_face_locations:
                     self.addFace(Face(self.frame, face_location,face_encoding))
@@ -67,14 +80,12 @@ class Faces():
 
             else:
                 first_match_index = matches.index(True)
-
-                loc_match_index = self.arr_encode_faces.index(face_encoding)
-
+                loc_match_index = i
 
                 a = self.arr_face_locations[loc_match_index]
 
                 self.arr_faces[first_match_index].face_location = a
-
+            i+=1
 
 
 
@@ -99,19 +110,20 @@ class Faces():
 
     def displayNames(self,frame):
         for face in self.arr_faces:
-            top, right, bottom, left = face.face_location
-            top *= 4
-            right *= 4
-            bottom *= 4
-            left *= 4
+            if face.on_screen:
+                top, right, bottom, left = face.face_location
+                top *= 4
+                right *= 4
+                bottom *= 4
+                left *= 4
 
-            # Draw a box around the face
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+                # Draw a box around the face
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-            # Draw a label with a name below the face
-            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(frame, face.name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+                # Draw a label with a name below the face
+                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, face.name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
 
 
@@ -212,90 +224,13 @@ while True:
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_small_frame = small_frame[:, :, ::-1]
     # Only process every other frame of video to save time
-    if (process_this_frame) and (while_counter > 15):
+    if (while_counter > 15):
         while_counter = 0
-
-
-        #face_locations = face_recognition.face_locations(rgb_small_frame)
-
-        #face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-
 
 
         faces.locateFaces(rgb_small_frame)
         faces.encodeFaces()
         faces.saveFaces()
-
-
-
-        face_names = []
-        for face_encoding in faces.arr_encode_faces:
-
-            matches = face_recognition.compare_faces(faces.getFacesEncoding(), face_encoding)
-            name = "Unknown"
-            if True in matches:
-                first_match_index = matches.index(True)
-                name = faces.getFacesNames()[first_match_index]
-
-            face_names.append(name)
-
-        #f_locations = faces.arr_face_locations
-
-
-
-
-
-
-    """
-        face_names = []
-        for face_encoding in face_encodings:
-
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-            print(matches)
-
-
-            name = "Unknown"
-
-            # If a match was found in known_face_encodings, just use the first one.
-            if True in matches:
-                first_match_index = matches.index(True)
-                print(first_match_index)
-                name = known_face_names[first_match_index]
-
-
-            if name == "Unknown":
-                save_faces(rgb_small_frame, "faces/Unknown-" + str(user_code))
-                user_code += 1
-                known_face_encodings, known_face_names = load_faces()
-
-            face_names.append(name)
-            """
-
-    process_this_frame = not process_this_frame
-
-
-    # Display the results
-#    for (top, right, bottom, left), name in zip(face_locations, face_names):
-    """
-    #print(f_locations)
-    for (top, right, bottom, left), name in zip(f_locations, faces.getFacesNames()):
-        # Scale back up face locations since the frame we detected in was scaled to 1/4 size
-        top *= 4
-        right *= 4
-        bottom *= 4
-        left *= 4
-
-        # Draw a box around the face
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
-        # Draw a label with a name below the face
-        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-        font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
-    # Display the resulting image
-    cv2.imshow('Video', frame)
-    """
 
     faces.displayNames(frame)
     cv2.imshow('Video', frame)
