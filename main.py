@@ -8,24 +8,21 @@ class Face():
 
     contador = 0
 
-
-    def __init__(self, frame, face_location,face_encoding):
+    def __init__(self, face_encoding, face_location):
         self.name = "Unknown-" + str(Face.contador)
         self.file = "faces/Unknown-" + str(Face.contador) + ".jpg"
 
         Face.contador += 1
-
         self.face_location = face_location
-        top, right, bottom, left = face_location
-        face_image = frame[top:bottom, left:right]
-        pil_image = Image.fromarray(face_image)
-        pil_image.save(self.file, "JPEG")
 
-        #self.encoded = face_recognition.face_encodings(face_recognition.load_image_file(self.file))[0]
         self.encoded = face_encoding
         self.on_screen = False
 
-
+    def save_face(self, frame):
+        top, right, bottom, left = self.face_location
+        face_image = frame[top:bottom, left:right]
+        pil_image = Image.fromarray(face_image)
+        pil_image.save(self.file, "JPEG")
 
 
 
@@ -75,7 +72,9 @@ class Faces():
 
             if True not in matches:
                 for face_location in self.arr_face_locations:
-                    self.addFace(Face(self.frame, face_location,face_encoding))
+                    a_face = Face(face_encoding, face_location)
+                    a_face.save_face(self.frame)
+                    self.addFace(a_face)
 
 
             else:
@@ -85,7 +84,7 @@ class Faces():
                 a = self.arr_face_locations[loc_match_index]
 
                 self.arr_faces[first_match_index].face_location = a
-            i+=1
+            i += 1
 
 
 
@@ -125,93 +124,30 @@ class Faces():
                 font = cv2.FONT_HERSHEY_DUPLEX
                 cv2.putText(frame, face.name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-
-
-
-
     def compareFaces(self,face_encoding):
         return face_recognition.compare_faces(self.getFacesEncoding(), face_encoding)
 
+    def loadFaces(self, path):
+        images = os.listdir(path)
 
+        for image in images:
 
-
-def save_faces(image,file_name):
-    for face_location in face_locations:
-        # Print the location of each face in this image
-        top, right, bottom, left = face_location
-        #print(
-        #    "A face is located at pixel location Top: {}, Left: {}, Bottom: {}, Right: {}".format(top, left, bottom,
-        #                                                                                          right))
-
-        # You can access the actual face itself like this:
-        face_image = image[top:bottom, left:right]
-        pil_image = Image.fromarray(face_image)
-        pil_image.save(file_name + ".jpg", "JPEG")
-
-
-
-
-
-
-
-
-
-
+            b = face_recognition.load_image_file(path + "/" + image)
+            face_encoding = face_recognition.face_encodings(b)[0]
+            a_face = Face(face_encoding, None)
+            self.addFace(a_face)
 
 
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
 
-known_face_encodings = []
-known_face_names = []
-
-
-def load_faces():
-    images = os.listdir("faces")
-    for image in images:
-        if (image not in known_face_names):
-
-
-
-            b = face_recognition.load_image_file("faces/" + image)
-            try:
-                a = face_recognition.face_encodings(b)[0]
-
-                known_face_encodings.append(a)
-            except:
-                pass
-            known_face_names.append(image)
-    return known_face_encodings,known_face_names
-
-
-
-
-
-
-
-
-
-
-# Initialize some variables
-face_locations = []
-face_encodings = []
-face_names = []
-process_this_frame = True
-
-
-#esto es lo que uso para evitar que encodee en cada vuelta del while
+# esto es lo que uso para evitar que encodee en cada vuelta del while
 while_counter = 0
-
-#esto es lo que va a setear el codigo de las personas que va leyendo
-user_code = 0
-
 
 
 faces = Faces()
-
-f_locations = []
-
+faces.loadFaces("faces")
 
 while True:
     while_counter += 1
@@ -224,9 +160,8 @@ while True:
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_small_frame = small_frame[:, :, ::-1]
     # Only process every other frame of video to save time
-    if (while_counter > 15):
+    if while_counter > 15:
         while_counter = 0
-
 
         faces.locateFaces(rgb_small_frame)
         faces.encodeFaces()
@@ -234,7 +169,6 @@ while True:
 
     faces.displayNames(frame)
     cv2.imshow('Video', frame)
-
 
     # Hit 'q' on the keyboard to quit!
     if cv2.waitKey(1) & 0xFF == ord('q'):
